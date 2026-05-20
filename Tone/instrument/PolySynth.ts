@@ -190,12 +190,16 @@ export class PolySynth<
 	 * re-added to the pool of available voices
 	 */
 	private _makeVoiceAvailable(voice: Voice): void {
-		this._availableVoices.push(voice);
+		if (!this._availableVoices.includes(voice)) {
+			this._availableVoices.push(voice);
+		}
 		// remove the midi note from 'active voices'
 		const activeVoiceIndex = this._activeVoices.findIndex(
 			(e) => e.voice === voice
 		);
-		this._activeVoices.splice(activeVoiceIndex, 1);
+		if (activeVoiceIndex !== -1) {
+			this._activeVoices.splice(activeVoiceIndex, 1);
+		}
 	}
 
 	/**
@@ -259,14 +263,23 @@ export class PolySynth<
 	): void {
 		notes.forEach((note) => {
 			const midiNote = new MidiClass(this.context, note).toMidi();
-			const voice = this._getNextAvailableVoice();
+			const releasedEvent = this._activeVoices.find(
+				({ midi, released }) => midi === midiNote && released
+			);
+			const voice = releasedEvent
+				? releasedEvent.voice
+				: this._getNextAvailableVoice();
 			if (voice) {
 				voice.triggerAttack(note, time, velocity);
-				this._activeVoices.push({
-					midi: midiNote,
-					voice,
-					released: false,
-				});
+				if (releasedEvent) {
+					releasedEvent.released = false;
+				} else {
+					this._activeVoices.push({
+						midi: midiNote,
+						voice,
+						released: false,
+					});
+				}
 				this.log("triggerAttack", note, time);
 			}
 		});
