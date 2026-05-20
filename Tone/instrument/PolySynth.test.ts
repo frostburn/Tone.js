@@ -235,6 +235,29 @@ describe("PolySynth", () => {
 			expect(buffer.getTimeOfLastSound()).to.be.closeTo(0.3, 0.01);
 		});
 
+		it("re-triggering the same note reuses the active voice", async () => {
+			await Offline(() => {
+				const synth = new PolySynth(Synth, {
+					oscillator: {
+						type: "fatsawtooth",
+					},
+					envelope: {
+						release: 0.05,
+					},
+					volume: -12,
+				});
+				synth.toDestination();
+				for (let i = 0; i < 12; i++) {
+					const time = i * 0.05;
+					synth.triggerAttack("C4", time);
+					synth.triggerRelease("C4", time + 0.03);
+				}
+				return atTime(0.6, () => {
+					expect(synth.activeVoices).to.equal(0);
+				});
+			}, 0.8);
+		});
+
 		it("can trigger another attack right after the release has ended", async () => {
 			// compute the end time
 			const buffer = await Offline(() => {
