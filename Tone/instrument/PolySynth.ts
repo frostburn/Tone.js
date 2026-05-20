@@ -190,7 +190,9 @@ export class PolySynth<
 	 * re-added to the pool of available voices
 	 */
 	private _makeVoiceAvailable(voice: Voice): void {
-		this._availableVoices.push(voice);
+		if (!this._availableVoices.includes(voice)) {
+			this._availableVoices.push(voice);
+		}
 		// remove the midi note from 'active voices'
 		const activeVoiceIndex = this._activeVoices.findIndex(
 			(e) => e.voice === voice
@@ -225,16 +227,6 @@ export class PolySynth<
 			this._voices.push(voice);
 			return voice;
 		} else {
-			const releasedVoiceIndex = this._activeVoices.findIndex(
-				({ released }) => released
-			);
-			if (releasedVoiceIndex !== -1) {
-				const releasedVoice = this._activeVoices.splice(
-					releasedVoiceIndex,
-					1
-				)[0];
-				return releasedVoice.voice;
-			}
 			warn("Max polyphony exceeded. Note dropped.");
 		}
 	}

@@ -235,26 +235,6 @@ describe("PolySynth", () => {
 			expect(buffer.getTimeOfLastSound()).to.be.closeTo(0.3, 0.01);
 		});
 
-		it("does not remove active voices when reclaimed voices go silent", async () => {
-			await Offline(() => {
-				const synth = new PolySynth({
-					maxPolyphony: 1,
-					options: {
-						envelope: {
-							release: 0.2,
-						},
-					},
-				});
-				synth.toDestination();
-				synth.triggerAttack("C4", 0);
-				synth.triggerRelease("C4", 0.05);
-				synth.triggerAttack("E4", 0.08);
-				synth.triggerRelease("E4", 0.3);
-				return atTime(0.15, () => {
-					expect(synth.activeVoices).to.equal(1);
-				});
-			}, 0.6);
-		});
 
 		it("preserves release timing for overlapping retriggers", async () => {
 			const buffer = await Offline(() => {
