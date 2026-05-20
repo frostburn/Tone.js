@@ -259,13 +259,17 @@ export class PolySynth<
 	): void {
 		notes.forEach((note) => {
 			const midiNote = new MidiClass(this.context, note).toMidi();
-			const event = this._activeVoices.find(
-				({ midi, released }) => midi === midiNote && !released
+			const releasedEvent = this._activeVoices.find(
+				({ midi, released }) => midi === midiNote && released
 			);
-			const voice = event ? event.voice : this._getNextAvailableVoice();
+			const voice = releasedEvent
+				? releasedEvent.voice
+				: this._getNextAvailableVoice();
 			if (voice) {
 				voice.triggerAttack(note, time, velocity);
-				if (!event) {
+				if (releasedEvent) {
+					releasedEvent.released = false;
+				} else {
 					this._activeVoices.push({
 						midi: midiNote,
 						voice,
