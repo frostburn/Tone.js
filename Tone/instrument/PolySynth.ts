@@ -195,7 +195,9 @@ export class PolySynth<
 		const activeVoiceIndex = this._activeVoices.findIndex(
 			(e) => e.voice === voice
 		);
-		this._activeVoices.splice(activeVoiceIndex, 1);
+		if (activeVoiceIndex !== -1) {
+			this._activeVoices.splice(activeVoiceIndex, 1);
+		}
 	}
 
 	/**
