@@ -223,6 +223,16 @@ export class PolySynth<
 			this._voices.push(voice);
 			return voice;
 		} else {
+			const releasedVoiceIndex = this._activeVoices.findIndex(
+				({ released }) => released
+			);
+			if (releasedVoiceIndex !== -1) {
+				const releasedVoice = this._activeVoices.splice(
+					releasedVoiceIndex,
+					1
+				)[0];
+				return releasedVoice.voice;
+			}
 			warn("Max polyphony exceeded. Note dropped.");
 		}
 	}
